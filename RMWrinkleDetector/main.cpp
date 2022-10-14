@@ -25,17 +25,26 @@ using namespace cv;
 
 int main(int argc, const char * argv[])
 {
-    Mat srcImage = imread("G:\\博客\\图像处理\\hessian\\hessian_matrix\\Multiscale vessel enhancement filtering1.bmp");
- 
-    if (srcImage.empty())
+    // Get Model label and input image
+    if (argc != 3)
     {
-        cout << "图像未被读入";
-        system("pause");
+        cout << "{target} srcImg annoImg" << endl;
         return 0;
     }
+    
+    string srcImgFile(argv[1]);
+    string annoImgFile(argv[2]);
+    
+    Mat srcImage = imread(srcImgFile);
+    if (srcImage.empty())
+    {
+        cout << "Failed read source image: " << srcImgFile << endl;
+        return 0;
+    }
+    
     if (srcImage.channels() != 1)
     {
-        cvtColor(srcImage, srcImage, CV_RGB2GRAY);
+        cvtColor(srcImage, srcImage, COLOR_RGB2GRAY);
     }
     
     int width = srcImage.cols;
@@ -48,7 +57,7 @@ int main(int argc, const char * argv[])
     Mat xyGauKernel(2 * W + 1, 2 * W + 1, CV_32FC1, Scalar::all(0));
     Mat yyGauKernel(2 * W + 1, 2 * W + 1, CV_32FC1, Scalar::all(0));
  
-        //构建高斯二阶偏导数模板
+    //构建高斯二阶偏导数模板
     for (int i = -W; i <= W;i++)
     {
         for (int j = -W; j <= W; j++)
