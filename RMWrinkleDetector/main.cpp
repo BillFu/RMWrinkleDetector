@@ -14,6 +14,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <map>
+#include <algorithm>    // std::min_element, std::max_element
+
  
 #define STEP 6
 #define ABS(X) ((X)>0? X:(-(X)))
@@ -47,10 +49,9 @@ int main(int argc, const char * argv[])
         cvtColor(srcImage, srcImage, COLOR_RGB2GRAY);
     }
     
-    int width = srcImage.cols;
-    int height = srcImage.rows;
+    int srcW = srcImage.cols;
+    int srcH = srcImage.rows;
  
-    Mat outImage(height, width, CV_8UC1,Scalar::all(0));
     int W = 5;
     float sigma = 0.1;
     Mat xxGauKernel(2 * W + 1, 2 * W + 1, CV_32FC1, Scalar::all(0));
@@ -62,12 +63,14 @@ int main(int argc, const char * argv[])
     {
         for (int j = -W; j <= W; j++)
         {
-            xxGauKernel.at<float>(i + W, j + W) = (1 - (i*i) / (sigma*sigma))*exp(-1 * (i*i + j*j) / (2 * sigma*sigma))*(-1 / (2 * PI*pow(sigma, 4)));
-            yyGauKernel.at<float>(i + W, j + W) = (1 - (j*j) / (sigma*sigma))*exp(-1 * (i*i + j*j) / (2 * sigma*sigma))*(-1 / (2 * PI*pow(sigma, 4)));
-            xyGauKernel.at<float>(i + W, j + W) = ((i*j))*exp(-1 * (i*i + j*j) / (2 * sigma*sigma))*(1 / (2 * PI*pow(sigma, 6)));
+            xxGauKernel.at<float>(i + W, j + W) =
+                (1 - (i*i) / (sigma*sigma))*exp(-1 * (i*i + j*j) / (2 * sigma*sigma))*(-1 / (2 * PI*pow(sigma, 4)));
+            yyGauKernel.at<float>(i + W, j + W) =
+                (1 - (j*j) / (sigma*sigma))*exp(-1 * (i*i + j*j) / (2 * sigma*sigma))*(-1 / (2 * PI*pow(sigma, 4)));
+            xyGauKernel.at<float>(i + W, j + W) =
+                ((i*j))*exp(-1 * (i*i + j*j) / (2 * sigma*sigma))*(1 / (2 * PI*pow(sigma, 6)));
         }
     }
- 
  
     for (int i = 0; i < (2 * W + 1); i++)
     {
@@ -78,23 +81,22 @@ int main(int argc, const char * argv[])
         cout << endl;
     }
  
-    Mat xxDerivae(height, width, CV_32FC1, Scalar::all(0));
-    Mat yyDerivae(height, width, CV_32FC1, Scalar::all(0));
-    Mat xyDerivae(height, width, CV_32FC1, Scalar::all(0));
-        //图像与高斯二阶偏导数模板进行卷积
-    filter2D(srcImage, xxDerivae, xxDerivae.depth(), xxGauKernel);
-    filter2D(srcImage, yyDerivae, yyDerivae.depth(), yyGauKernel);
-    filter2D(srcImage, xyDerivae, xyDerivae.depth(), xyGauKernel);
+    Mat xxDerivative(srcH, srcW, CV_32FC1, Scalar::all(0));
+    Mat yyDerivative(srcH, srcW, CV_32FC1, Scalar::all(0));
+    Mat xyDerivative(srcH, srcW, CV_32FC1, Scalar::all(0));
+    
+    //图像与高斯二阶偏导数模板进行卷积
+    filter2D(srcImage, xxDerivative, xxDerivative.depth(), xxGauKernel);
+    filter2D(srcImage, yyDerivative, yyDerivative.depth(), yyGauKernel);
+    filter2D(srcImage, xyDerivative, xyDerivative.depth(), xyGauKernel);
  
- 
-    for (int h = 0; h < height; h++)
+    Mat outImage(srcH, srcW, CV_32FC1, Scalar::all(0));
+
+    for (int h = 0; h < srcH; h++)
     {
-        for (int w = 0; w < width; w++)
+        for (int w = 0; w < srcW; w++)
         {
-            
-            
-                //map<int, float> best_step;
-                
+            //map<int, float> best_step;
             /*    int HLx = h - STEP; if (HLx < 0){ HLx = 0; }
                 int HUx = h + STEP; if (HUx >= height){ HUx = height - 1; }
                 int WLy = w - STEP; if (WLy < 0){ WLy = 0; }
@@ -103,13 +105,11 @@ int main(int argc, const char * argv[])
                 float fyy = srcImage.at<uchar>(HLx, w) + srcImage.at<uchar>(HUx, w) - 2 * srcImage.at<uchar>(h, w);
                 float fxy = 0.25*(srcImage.at<uchar>(HUx, WUy) + srcImage.at<uchar>(HLx, WLy) - srcImage.at<uchar>(HUx, WLy) - srcImage.at<uchar>(HLx, WUy));*/
  
+            float fxx = xxDerivative.at<float>(h, w);
+            float fyy = yyDerivative.at<float>(h, w);
+            float fxy = xyDerivative.at<float>(h, w);
  
-            float fxx = xxDerivae.at<float>(h, w);
-            float fyy = yyDerivae.at<float>(h, w);
-            float fxy = xyDerivae.at<float>(h, w);
- 
- 
-            float myArray[2][2] = { { fxx, fxy }, { fxy, fyy } };          //构建矩阵，求取特征值
+            float myArray[2][2] = {{ fxx, fxy }, { fxy, fyy }};          //构建矩阵，求取特征值
  
             Mat Array(2, 2, CV_32FC1, myArray);
             Mat eValue;
@@ -119,32 +119,27 @@ int main(int argc, const char * argv[])
             float a1 = eValue.at<float>(0, 0);
             float a2 = eValue.at<float>(1, 0);
  
-            if ((a1>0) && (ABS(a1)>(1+ ABS(a2))))             //根据特征向量判断线性结构
+            if ((a1>0) && (ABS(a1)>(1 + ABS(a2))))             //根据特征向量判断线性结构
             {
- 
- 
-                outImage.at<uchar>(h, w) =  pow((ABS(a1) - ABS(a2)), 4);
+                cout << "Found!" << endl;
+                outImage.at<float>(h, w) =  pow((ABS(a1) - ABS(a2)), 4);
                 //outImage.at<uchar>(h, w) = pow((ABS(a1) / ABS(a2))*(ABS(a1) - ABS(a2)), 1.5);
-                
-                
             }
- 
- 
-                
         }
- 
     }
  
-    
-//----------做一个闭操作
+    float maxValue = *max_element(outImage.begin<float>(), outImage.end<float>());
+    float minValue = *min_element(outImage.begin<float>(), outImage.end<float>());
+    cout << "maxValue: " << maxValue << endl;
+    cout << "minValue: " << minValue << endl;
+
+    /*
+    //----------做一个闭操作
     Mat element = getStructuringElement(MORPH_RECT, Size(3, 2));
     morphologyEx(outImage, outImage, MORPH_CLOSE, element);
     
-    imwrite("temp.bmp", outImage);
+    imwrite(annoImgFile, outImage);
+    */
  
-    imshow("[原始图]", outImage);
-    waitKey(0);
- 
-    system("pause");
     return 0;
 }

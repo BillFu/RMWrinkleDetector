@@ -1,1 +1,1 @@
-bin/RMWD images/case1/img_sun.JPG result/anno.png
+bin/RMWD images/case1_sun_crop_scale4.JPG result/anno.png
