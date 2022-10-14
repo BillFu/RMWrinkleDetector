@@ -1,0 +1,5 @@
+/usr/local/Cellar/opencv/4.6.0/include/opencv4
+${PROJECT_DIR}/include
+/Users/meicet/nlohmann_json/include
+
+cp ${TARGET_BUILD_DIR}/${TARGET_NAME} ${PROJECT_DIR}/bin/${TARGET_NAME}

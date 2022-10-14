@@ -1,0 +1,1 @@
+/usr/local/Cellar/opencv/4.6.0/lib
