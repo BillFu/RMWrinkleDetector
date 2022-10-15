@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CB4236EE28F934CB008889F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB4236ED28F934CB008889F2 /* main.cpp */; };
+		2656273528FA4CDC009C71C0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2656273428FA4CDC009C71C0 /* main.cpp */; };
+		2656273B28FA541F009C71C0 /* frangi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2656273928FA541F009C71C0 /* frangi.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +24,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2656273428FA4CDC009C71C0 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		2656273928FA541F009C71C0 /* frangi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = frangi.cpp; sourceTree = "<group>"; };
+		2656273A28FA541F009C71C0 /* frangi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = frangi.h; sourceTree = "<group>"; };
 		CB4236EA28F934CB008889F2 /* RMWrinkleDetector */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RMWrinkleDetector; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB4236ED28F934CB008889F2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +60,9 @@
 		CB4236EC28F934CB008889F2 /* RMWrinkleDetector */ = {
 			isa = PBXGroup;
 			children = (
-				CB4236ED28F934CB008889F2 /* main.cpp */,
+				2656273928FA541F009C71C0 /* frangi.cpp */,
+				2656273A28FA541F009C71C0 /* frangi.h */,
+				2656273428FA4CDC009C71C0 /* main.cpp */,
 			);
 			path = RMWrinkleDetector;
 			sourceTree = "<group>";
@@ -118,6 +123,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		CB4236F428F93F17008889F2 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -140,7 +146,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB4236EE28F934CB008889F2 /* main.cpp in Sources */,
+				2656273B28FA541F009C71C0 /* frangi.cpp in Sources */,
+				2656273528FA4CDC009C71C0 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

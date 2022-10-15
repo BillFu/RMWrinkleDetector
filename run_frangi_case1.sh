@@ -1,0 +1,1 @@
+bin/RMWD images/case1_sun_cropped.JPG result/frangi_case1_sun.png
