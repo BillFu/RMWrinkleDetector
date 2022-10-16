@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2645169428FAE71C00BFDA17 /* frangi_rm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2645169228FAE71C00BFDA17 /* frangi_rm.cpp */; };
 		2656273528FA4CDC009C71C0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2656273428FA4CDC009C71C0 /* main.cpp */; };
-		2656273B28FA541F009C71C0 /* frangi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2656273928FA541F009C71C0 /* frangi.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +24,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2645169228FAE71C00BFDA17 /* frangi_rm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = frangi_rm.cpp; sourceTree = "<group>"; };
+		2645169528FAE96500BFDA17 /* frangi_rm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = frangi_rm.hpp; sourceTree = "<group>"; };
 		2656273428FA4CDC009C71C0 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		2656273928FA541F009C71C0 /* frangi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = frangi.cpp; sourceTree = "<group>"; };
-		2656273A28FA541F009C71C0 /* frangi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = frangi.h; sourceTree = "<group>"; };
 		CB4236EA28F934CB008889F2 /* RMWrinkleDetector */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RMWrinkleDetector; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -60,8 +60,8 @@
 		CB4236EC28F934CB008889F2 /* RMWrinkleDetector */ = {
 			isa = PBXGroup;
 			children = (
-				2656273928FA541F009C71C0 /* frangi.cpp */,
-				2656273A28FA541F009C71C0 /* frangi.h */,
+				2645169528FAE96500BFDA17 /* frangi_rm.hpp */,
+				2645169228FAE71C00BFDA17 /* frangi_rm.cpp */,
 				2656273428FA4CDC009C71C0 /* main.cpp */,
 			);
 			path = RMWrinkleDetector;
@@ -146,8 +146,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2656273B28FA541F009C71C0 /* frangi.cpp in Sources */,
 				2656273528FA4CDC009C71C0 /* main.cpp in Sources */,
+				2645169428FAE71C00BFDA17 /* frangi_rm.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

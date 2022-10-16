@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <vector>
 
-#include "frangi.h"
+#include "frangi_rm.hpp"
 
 using namespace std;
 using namespace cv;
@@ -38,10 +38,10 @@ int main(int argc, char *argv[])
 	Mat vesselness, scale, angles;
     
     //使用默认参数设定Frangi
-    frangi2d_opts_t opts;
-    frangi2d_createopts(&opts);
+    Frangi2d_Opts opts;
+    Frangi2d_CreateOpts(&opts);
     
-	frangi2d(input_img_fl, vesselness, scale, angles, opts);
+	DoFrangi2d(input_img_fl, vesselness, scale, angles, opts);
 	
     //显示结果
 	vesselness.convertTo(vesselness, CV_8UC1, 255);
