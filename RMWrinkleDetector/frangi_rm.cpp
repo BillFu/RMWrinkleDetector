@@ -88,8 +88,8 @@ void Frangi2d_CreateOpts(Frangi2d_Opts* opts)
 	opts->sigma_end = DEFAULT_SIGMA_END;
 	opts->sigma_step = DEFAULT_SIGMA_STEP;
 
-	opts->BetaOne = DEFAULT_BETA_ONE; //ignore blob-like structures?
-	opts->BetaTwo = DEFAULT_BETA_TWO; //appropriate background suppression for this specific image, but can change. 
+	//opts->BetaOne = DEFAULT_BETA_ONE; //ignore blob-like structures?
+	//opts->BetaTwo = DEFAULT_BETA_TWO; //appropriate background suppression for this specific image, but can change. 
 
 	opts->DarkStructBriBg = DEFAULT_DSBB;
 }

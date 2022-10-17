@@ -1,0 +1,1 @@
+bin/RMWD images/case1_fh.JPG result/case1_sun/rm_fh.png

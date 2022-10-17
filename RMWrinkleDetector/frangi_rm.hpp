@@ -28,19 +28,19 @@ struct Frangi2d_Opts{
 	
 	//BetaOne: suppression of blob-like structures. 
 	//BetaTwo: background suppression. (See Frangi1998...)
-	float BetaOne;
-	float BetaTwo;
+	//float BetaOne;
+	//float BetaTwo;
 
     //enhance black structures if true, otherwise enhance white structures
     bool DarkStructBriBg;
 } ;
 
 #define DEFAULT_SIGMA_START     5
-#define DEFAULT_SIGMA_END       15
+#define DEFAULT_SIGMA_END       25
 #define DEFAULT_SIGMA_STEP      5
 
-#define DEFAULT_BETA_ONE        1.6
-#define DEFAULT_BETA_TWO        0.08
+//#define DEFAULT_BETA_ONE        1.6
+//#define DEFAULT_BETA_TWO        0.08
 #define DEFAULT_DSBB            true  // DarkStructBriBg
 
 
