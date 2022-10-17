@@ -15,6 +15,7 @@ Date:   2022/10/15
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>    // std::min_element, std::max_element
 
 #include "frangi_rm.hpp"
 
@@ -90,7 +91,7 @@ void Frangi2d_CreateOpts(Frangi2d_Opts* opts)
 	opts->BetaOne = DEFAULT_BETA_ONE; //ignore blob-like structures?
 	opts->BetaTwo = DEFAULT_BETA_TWO; //appropriate background suppression for this specific image, but can change. 
 
-	opts->BlackWhite = DEFAULT_BLACKWHITE; 
+	opts->DarkStructBriBg = DEFAULT_DSBB;
 }
 
 //estimate eigenvalues from Dxx, Dxy, Dyy. Save results to lambda1, lambda2, Ix, Iy. 
@@ -122,7 +123,7 @@ void frangi2_eig2image(const Mat &Dxx, const Mat &Dxy, const Mat &Dyy,
 	Mat mu1 = 0.5*(Dxx + Dyy + tmp);
 	Mat mu2 = 0.5*(Dxx + Dyy - tmp);
 
-	//sort eigenvalues by absolute value abs(Lambda1) < abs(Lamda2)
+	// !!! sort eigenvalues by absolute value abs(Lambda1) < abs(Lamda2)
 	Mat check = abs(mu1) > abs(mu2);
 	mu1.copyTo(lambda1);
     mu2.copyTo(lambda1, check);
@@ -135,14 +136,46 @@ void frangi2_eig2image(const Mat &Dxx, const Mat &Dxy, const Mat &Dyy,
     v2y.copyTo(Iy, check);
 }
 
-//Vesselness is saved in J, scale is saved to scale, vessel angle is saved to directions.
-void DoFrangi2d(const Mat &src, Mat &maxVals, Mat &whatScale,
-              Mat &outAngles, Frangi2d_Opts opts)
+void CalcLambdaP(const Mat& lambda2, float T, Mat& lambdaP)
 {
-	vector<Mat> AllFiltered; //All means the results in all space scales (i.e., sigma) will be collected.
+    lambdaP = Mat::zeros(lambda2.rows, lambda2.cols, CV_32F);
+    float maxLambda2 = *max_element(lambda2.begin<float>(), lambda2.end<float>());
+    float thMaxLam2 = T * maxLambda2;
+    Mat mask1 = (lambda2 > thMaxLam2);
+    lambda2.copyTo(lambdaP, mask1);
+    Mat mask2 = ((lambda2 >= 0) & (lambda2 <= thMaxLam2));
+    lambdaP.setTo(thMaxLam2, mask2);
+}
+
+void CalcV_viaLp(const Mat& lambda2, const Mat& lambdaP,  Mat& V)
+{
+    Mat L2Sq = lambda2.mul(lambda2);
+    Mat item1 = L2Sq.mul(lambdaP);
+    L2Sq.release();
+    
+    Mat denomiantor = 2.0*lambda2 + lambdaP;
+    Mat item2 = 3.0 / denomiantor;
+    Mat item2Cube = item2.mul(item2).mul(item2);
+    
+    V = item1.mul(item2Cube);
+}
+
+void CalcV(const Mat& lambda2, float T, Mat& V)
+{
+    Mat lambdaP;
+    CalcLambdaP(lambda2, T, lambdaP);
+    CalcV_viaLp(lambda2, lambdaP, V);
+}
+
+//Vesselness is saved in J, scale is saved to scale, vessel angle is saved to directions.
+// T: in [0.5 1.0]
+void DoFrangi2d(const Mat &src, Mat &maxVals, Mat &whatScale,
+              Mat &outAngles, Frangi2d_Opts opts, float T)
+{
+	vector<Mat> AllV; //All means the results in all space scales (i.e., sigma) will be collected.
 	vector<Mat> AllAngles;
-	float beta = 2*opts.BetaOne*opts.BetaOne;
-	float c = 2*opts.BetaTwo*opts.BetaTwo;
+	//float beta = 2*opts.BetaOne*opts.BetaOne;
+	//float c = 2*opts.BetaTwo*opts.BetaTwo;
 
 	for (float sigma = opts.sigma_start; sigma <= opts.sigma_end; sigma += opts.sigma_step)
     {
@@ -157,6 +190,12 @@ void DoFrangi2d(const Mat &src, Mat &maxVals, Mat &whatScale,
 		Mat lambda1, lambda2, Ix, Iy;
 		frangi2_eig2image(Dxx, Dxy, Dyy, lambda1, lambda2, Ix, Iy);
 		
+        if (opts.DarkStructBriBg == false) // enhance bright structures if false, otherwise enhance black structures
+        {
+            lambda1 = -lambda1;
+            lambda2 = -lambda2;
+        }
+        
 		Mat angles;
         // phase函数计算方向场，该函数参数angleInDegrees默认为false，即弧度，当置为true时，则输出为角度。
         // 值域为0~360degrees，或者0~2*M_PI
@@ -170,41 +209,28 @@ void DoFrangi2d(const Mat &src, Mat &maxVals, Mat &whatScale,
         // the second argument is the mask
         // so, this statement intends to assign a tiny and positive value where a pixel equals zero
 		lambda2.setTo(nextafterf(0, 1), lambda2 == 0);
-		Mat Rb = lambda1.mul(1.0/lambda2);
-		Rb = Rb.mul(Rb);
-		Mat S2 = lambda1.mul(lambda1) + lambda2.mul(lambda2);
-
-		Mat tmp1, tmp2;
-		exp(-Rb/beta, tmp1);
-		exp(-S2/c, tmp2);
-	
-        Mat I = Mat::ones(src.rows, src.cols, src.type());
-		Mat Ifiltered = tmp1.mul(I - tmp2);
-		if (opts.BlackWhite) // enhance black structures if true, otherwise enhance white structures
-        {
-			Ifiltered.setTo(0, lambda2 < 0);
-		}
-        else
-        {
-			Ifiltered.setTo(0, lambda2 > 0);
-		}
+       
+        Mat lambdaP;
+        CalcLambdaP(lambda2, T, lambdaP);
+        Mat V = Mat::zeros(src.rows, src.cols, CV_32F);
+        CalcV(lambda2, T, V);
 
 		//store results
-        AllFiltered.push_back(Ifiltered);
+        AllV.push_back(V);
 	}
 
 	float sigma = opts.sigma_start;
-    AllFiltered[0].copyTo(maxVals);
-    AllFiltered[0].copyTo(whatScale);
-    AllFiltered[0].copyTo(outAngles);
+    AllV[0].copyTo(maxVals);
+    AllV[0].copyTo(whatScale);
+    AllV[0].copyTo(outAngles);
 	whatScale.setTo(sigma);
 
     // 将多个尺度下的结果“压扁”在一起
-	for (int i=1; i < AllFiltered.size(); i++)
+	for (int i=1; i < AllV.size(); i++)
     {
-		maxVals = max(maxVals, AllFiltered[i]);
-		whatScale.setTo(sigma, AllFiltered[i] == maxVals);
-        AllAngles[i].copyTo(outAngles, AllFiltered[i] == maxVals);
+		maxVals = max(maxVals, AllV[i]);
+		whatScale.setTo(sigma, AllV[i] == maxVals);
+        AllAngles[i].copyTo(outAngles, AllV[i] == maxVals);
 		sigma += opts.sigma_step;
 	}
 }

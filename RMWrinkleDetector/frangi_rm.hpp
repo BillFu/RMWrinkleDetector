@@ -31,7 +31,8 @@ struct Frangi2d_Opts{
 	float BetaOne;
 	float BetaTwo;
 
-	bool BlackWhite; //enhance black structures if true, otherwise enhance white structures
+    //enhance black structures if true, otherwise enhance white structures
+    bool DarkStructBriBg;
 } ;
 
 #define DEFAULT_SIGMA_START     5
@@ -40,7 +41,7 @@ struct Frangi2d_Opts{
 
 #define DEFAULT_BETA_ONE        1.6
 #define DEFAULT_BETA_TWO        0.08
-#define DEFAULT_BLACKWHITE      false  //true
+#define DEFAULT_DSBB            true  // DarkStructBriBg
 
 
 /////////////////
@@ -49,7 +50,8 @@ struct Frangi2d_Opts{
 
 // main function
 void DoFrangi2d(const cv::Mat &src, cv::Mat &J,
-              cv::Mat &scale, cv::Mat &directions, Frangi2d_Opts opts);
+              cv::Mat &scale, cv::Mat &directions, Frangi2d_Opts opts,
+                float T);
 
 ////////////////////
 //Helper functions//
